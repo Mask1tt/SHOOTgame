@@ -42,6 +42,14 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("SHOOT")
 clock = pygame.time.Clock()
 
+snd_dir = path.join(path.dirname(__file__), 'sound')
+shoot_sound = pygame.mixer.Sound(path.join(snd_dir, 'pew.wav'))
+expl_sounds = []
+for snd in ['expl3.wav', 'expl6.wav']:
+    expl_sounds.append(pygame.mixer.Sound(path.join(snd_dir, snd)))
+
+pygame.mixer.music.load(path.join(snd_dir, 'Cyberpunk Moonlight Sonata.mp3'))
+pygame.mixer.music.set_volume(0.4)
 
 # Функции
 
@@ -167,6 +175,7 @@ class Player(pygame.sprite.Sprite):
             bullet = Bullet(self.rect.centerx, self.rect.top)
             all_sprites.add(bullet)
             bullets.add(bullet)
+            shoot_sound.play()
 
     def hide(self):
         self.hidden = True
@@ -287,6 +296,7 @@ for i in range(8):
     newmob()
 
 game_over = True
+pygame.mixer.music.play(loops=-1)
 running = True
 while running:
     if game_over:
@@ -311,6 +321,7 @@ while running:
     hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits:
         score += 50 - hit.radius
+        random.choice(expl_sounds).play()
         expl = Explosion(hit.rect.center, 'lg')
         all_sprites.add(expl)
         if random.random() > 0.9:
@@ -326,6 +337,7 @@ while running:
         all_sprites.add(expl)
         newmob()
         if pilot.shield <= 0:
+            random.choice(expl_sounds).play()
             death_explosion = Explosion(pilot.rect.center, 'player')
             all_sprites.add(death_explosion)
             pilot.hide()
